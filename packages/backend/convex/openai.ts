@@ -43,7 +43,7 @@ export const summary = internalAction({
         },
         { role: "user", content: prompt },
       ],
-      model: "gpt-4-1106-preview",
+      model: "gpt-5.4",
       response_format: { type: "json_object" },
     });
 
