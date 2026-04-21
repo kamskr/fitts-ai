@@ -29,9 +29,7 @@ include:
 
 ### 1. Install dependencies
 
-If you don't have `yarn` installed, run `npm install --global yarn`.
-
-Run `yarn`.
+Run `pnpm install`.
 
 ### 2. Configure Convex
 
@@ -40,7 +38,7 @@ Run `yarn`.
 > that.
 
 ```sh
-npm run setup --workspace packages/backend
+pnpm --filter @packages/backend setup
 ```
 
 The script will log you into Convex if you aren't already and prompt you to
@@ -78,7 +76,7 @@ environment variables.
 Run the following command to run both the web and mobile apps:
 
 ```sh
-npm run dev
+pnpm dev
 ```
 
 This will allow you to use the ⬆ and ⬇ keyboard keys to see logs for each
@@ -110,7 +108,7 @@ This monorepo template includes the following packages/apps:
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-To install a new package, `cd` into that directory, such as [packages/backend](./packages/backend/), and then run `yarn add mypackage@latest`
+To install a new package in a workspace, run `pnpm add mypackage@latest --filter @packages/backend` from the repo root.
 
 ### Utilities
 
