@@ -1,24 +1,44 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { internal } from "../convex/_generated/api";
-import { Auth } from "convex/server";
+import { mutation, query } from "./_generated/server";
 
-export const getUserId = async (ctx: { auth: Auth }) => {
-  return (await ctx.auth.getUserIdentity())?.subject;
-};
+const toLegacyWorkout = (
+  workout: {
+    _id: string;
+    _creationTime: number;
+    name: string;
+    description?: string;
+    notes?: string;
+  },
+) => ({
+  _id: workout._id,
+  _creationTime: workout._creationTime,
+  title: workout.name,
+  content: workout.description ?? workout.notes ?? "",
+  summary: undefined,
+});
+
+async function getCurrentUserIdOrNull(ctx: {
+  auth: { getUserIdentity: () => Promise<{ tokenIdentifier: string } | null> };
+}) {
+  const identity = await ctx.auth.getUserIdentity();
+  return identity?.tokenIdentifier ?? null;
+}
 
 export const getWorkouts = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getUserId(ctx);
-    if (!userId) return null;
+    const userId = await getCurrentUserIdOrNull(ctx);
+    if (!userId) {
+      return [];
+    }
 
     const workouts = await ctx.db
       .query("workouts")
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .collect();
+      .withIndex("by_userId_and_startedAt", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(100);
 
-    return workouts;
+    return workouts.map(toLegacyWorkout);
   },
 });
 
@@ -27,10 +47,17 @@ export const getWorkout = query({
     id: v.optional(v.id("workouts")),
   },
   handler: async (ctx, args) => {
-    const { id } = args;
-    if (!id) return null;
-    const workout = await ctx.db.get(id);
-    return workout;
+    const userId = await getCurrentUserIdOrNull(ctx);
+    if (!userId || !args.id) {
+      return null;
+    }
+
+    const workout = await ctx.db.get(args.id);
+    if (!workout || workout.userId !== userId) {
+      return null;
+    }
+
+    return toLegacyWorkout(workout);
   },
 });
 
@@ -40,20 +67,24 @@ export const createWorkout = mutation({
     content: v.string(),
     isSummary: v.boolean(),
   },
-  handler: async (ctx, { title, content, isSummary }) => {
-    const userId = await getUserId(ctx);
-    if (!userId) throw new Error("User not found");
-    const workoutId = await ctx.db.insert("workouts", { userId, title, content });
-
-    if (isSummary) {
-      await ctx.scheduler.runAfter(0, internal.openai.summary, {
-        id: workoutId,
-        title,
-        content,
-      });
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserIdOrNull(ctx);
+    if (!userId) {
+      throw new Error("User not found");
     }
 
-    return workoutId;
+    const now = Date.now();
+    return await ctx.db.insert("workouts", {
+      userId,
+      status: "completed",
+      origin: "manual",
+      startedAt: now,
+      completedAt: now,
+      name: args.title,
+      normalizedName: args.title.trim().toLowerCase(),
+      description: args.content,
+      notes: args.isSummary ? "AI summary disabled in structured-model migration." : undefined,
+    });
   },
 });
 
@@ -62,6 +93,16 @@ export const deleteWorkout = mutation({
     workoutId: v.id("workouts"),
   },
   handler: async (ctx, args) => {
+    const userId = await getCurrentUserIdOrNull(ctx);
+    if (!userId) {
+      throw new Error("User not found");
+    }
+
+    const workout = await ctx.db.get(args.workoutId);
+    if (!workout || workout.userId !== userId) {
+      throw new Error("Workout not found");
+    }
+
     await ctx.db.delete(args.workoutId);
   },
 });
