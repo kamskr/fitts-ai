@@ -8,9 +8,9 @@
  * @module
  */
 
-import type * as notes from "../notes.js";
 import type * as openai from "../openai.js";
 import type * as utils from "../utils.js";
+import type * as workouts from "../workouts.js";
 
 import type {
   ApiFromModules,
@@ -19,9 +19,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  notes: typeof notes;
   openai: typeof openai;
   utils: typeof utils;
+  workouts: typeof workouts;
 }>;
 
 /**

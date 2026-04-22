@@ -13,12 +13,12 @@ export const openaiKeySet = query({
 
 export const summary = internalAction({
   args: {
-    id: v.id("notes"),
+    id: v.id("workouts"),
     title: v.string(),
     content: v.string(),
   },
   handler: async (ctx, { id, title, content }) => {
-    const prompt = `Take in the following note and return a summary: Title: ${title}, Note content: ${content}`;
+    const prompt = `Take in the following workout entry and return a concise training summary. Workout title: ${title}, Workout details: ${content}`;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -64,7 +64,7 @@ export const summary = internalAction({
 
 export const saveSummary = internalMutation({
   args: {
-    id: v.id("notes"),
+    id: v.id("workouts"),
     summary: v.string(),
   },
   handler: async (ctx, { id, summary }) => {

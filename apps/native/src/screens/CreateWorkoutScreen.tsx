@@ -19,15 +19,15 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 const { width } = Dimensions.get("window");
 
-export default function CreateNoteScreen({ navigation }) {
-  const createNote = useMutation(api.notes.createNote);
+export default function CreateWorkoutScreen({ navigation }) {
+  const createWorkout = useMutation(api.workouts.createWorkout);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
 
   const [isAdvancedSummarizationEnabled, setIsAdvancedSummarizationEnabled] =
     useState(false);
-  const [noteContent, setNoteContent] = useState("");
-  const [noteTitle, setNoteTitle] = useState("");
+  const [workoutDetails, setWorkoutDetails] = useState("");
+  const [workoutTitle, setWorkoutTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const footerY = new Animated.Value(0);
   const toggleAdvancedSummarization = () => {
@@ -71,7 +71,7 @@ export default function CreateNoteScreen({ navigation }) {
     outputRange: [0, 100], // Adjust this range according to the height of your footer
   });
 
-  const createUserNote = async () => {
+  const createWorkoutEntry = async () => {
     if (isCreating) return;
 
     if (isConvexAuthLoading || !isAuthenticated) {
@@ -81,15 +81,15 @@ export default function CreateNoteScreen({ navigation }) {
 
     try {
       setIsCreating(true);
-      await createNote({
-        title: noteTitle,
-        content: noteContent,
+      await createWorkout({
+        title: workoutTitle,
+        content: workoutDetails,
         isSummary: isAdvancedSummarizationEnabled,
       });
-      navigation.navigate("NotesDashboardScreen");
+      navigation.navigate("WorkoutsDashboardScreen");
     } catch (error) {
-      console.error("Create note error", error);
-      Alert.alert("Could not create note", "Try again in a moment.");
+      console.error("Create workout error", error);
+      Alert.alert("Could not save workout", "Try again in a moment.");
     } finally {
       setIsCreating(false);
     }
@@ -112,7 +112,7 @@ export default function CreateNoteScreen({ navigation }) {
           />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Create a New Note</Text>
+        <Text style={styles.title}>Log a Workout</Text>
         <TouchableOpacity>
           <Image
             style={styles.arrowBack}
@@ -128,19 +128,19 @@ export default function CreateNoteScreen({ navigation }) {
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Title</Text>
           <TextInput
-            value={noteTitle}
-            onChangeText={(val: string) => setNoteTitle(val)}
+            value={workoutTitle}
+            onChangeText={(val: string) => setWorkoutTitle(val)}
             style={styles.inputField}
-            placeholder="Note Title"
+            placeholder="Workout Title"
             placeholderTextColor="#A9A9A9"
           />
-          <Text style={styles.inputLabel}>Content</Text>
+          <Text style={styles.inputLabel}>Details</Text>
           <TextInput
-            value={noteContent}
-            onChangeText={(val: string) => setNoteContent(val)}
+            value={workoutDetails}
+            onChangeText={(val: string) => setWorkoutDetails(val)}
             style={[styles.inputField, styles.inputFieldMulti]}
             multiline
-            placeholder="Note Comments"
+            placeholder="Sets, reps, weight, distance, or notes"
             placeholderTextColor="#A9A9A9"
           />
         </View>
@@ -172,25 +172,25 @@ export default function CreateNoteScreen({ navigation }) {
             </Text>
           </View>
           <Text style={styles.advancedSummarizationSubtext}>
-            {openaiKeySet
-              ? "Check this box if you want to generate summaries using AI."
-              : "Please set OPENAI_API_KEY in your environment variables."}
+              {openaiKeySet
+                ? "Check this box if you want AI to create a workout recap."
+                : "Please set OPENAI_API_KEY in your environment variables."}
           </Text>
         </View>
       </KeyboardAwareScrollView>
       <Animated.View
         style={[
-          styles.newNoteButtonContainer,
+          styles.newWorkoutButtonContainer,
           { transform: [{ translateY: footerTranslateY }] },
         ]}
       >
         <TouchableOpacity
-          onPress={createUserNote}
-          style={styles.newNoteButton}
+          onPress={createWorkoutEntry}
+          style={styles.newWorkoutButton}
           disabled={isCreating}
         >
           <AntDesign name="plus-circle" size={20} color="#fff" />
-          <Text style={styles.newNoteButtonText}>Create a New Note</Text>
+          <Text style={styles.newWorkoutButtonText}>Save Workout</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     color: "#A9A9A9",
     paddingHorizontal: 30,
   },
-  newNoteButton: {
+  newWorkoutButton: {
     flexDirection: "row",
     backgroundColor: "#0D87E1",
     borderRadius: 7,
@@ -324,13 +324,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
     elevation: 6,
   },
-  newNoteButtonText: {
+  newWorkoutButtonText: {
     color: "white",
     fontSize: RFValue(15),
     fontFamily: "MMedium",
     marginLeft: 10,
   },
-  newNoteButtonContainer: {
+  newWorkoutButtonContainer: {
     position: "absolute",
     bottom: 0,
     alignSelf: "center",

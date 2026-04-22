@@ -12,7 +12,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 
 const { width } = Dimensions.get("window");
 
-export default function InsideNoteScreen({ route, navigation }) {
+export default function WorkoutDetailsScreen({ route, navigation }) {
   const { item } = route.params;
   console.log({ item });
   const [activeTab, setActiveTab] = useState("original"); // State to manage active tab
@@ -48,7 +48,7 @@ export default function InsideNoteScreen({ route, navigation }) {
               ? item.content
               : item.summary
                 ? item.summary
-                : "No summary available"}
+                : "No AI recap available"}
           </Text>
         </View>
       </ScrollView>
@@ -79,7 +79,7 @@ export default function InsideNoteScreen({ route, navigation }) {
                 : styles.inactiveTabText,
             ]}
           >
-            Original
+            Details
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -104,7 +104,7 @@ export default function InsideNoteScreen({ route, navigation }) {
                 : styles.inactiveTabText,
             ]}
           >
-            Summary
+            AI Recap
           </Text>
         </TouchableOpacity>
       </View>

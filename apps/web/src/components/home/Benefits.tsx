@@ -2,26 +2,26 @@ import Image from "next/image";
 
 const benefits = [
   {
-    title: "Effortless Note-Taking",
-    description: "Capture thoughts effortlessly with our intuitive interface",
+    title: "Fast Workout Logging",
+    description: "Capture each session quickly with a simple, repeatable flow.",
     image: "/images/goodNews.png",
   },
   {
-    title: "Seamless Sync",
+    title: "Sync Everywhere",
     description:
-      "Access your notes anytime, anywhere, with seamless cloud synchronization.",
+      "Access your workout history anywhere with seamless cloud synchronization.",
     image: "/images/cloudSync.png",
   },
   {
-    title: "Enhanced Productivity",
+    title: "Consistency First",
     description:
-      "Let AI handle organization, so you can focus on what matters most.",
+      "Keep momentum by reviewing recent sessions and focusing on progression.",
     image: "/images/googleCalander.png",
   },
   {
-    title: "AI-Powered Insights",
+    title: "AI Workout Recaps",
     description:
-      "Gain valuable insights with smart analytics based on your note patterns.",
+      "Generate quick summaries from your workout details when you want an overview.",
     image: "/images/bot.png",
   },
 ];
@@ -41,7 +41,7 @@ const Benefits = () => {
           Benefits
         </p>
         <h3 className=" text-black text-3xl sm:text-[57px] not-italic font-medium leading-[90.3%] tracking-[-1.425px] font-montserrat text-center pb-[46px] sm:pb-[87px]">
-          Why Choose UseNotes
+          Why Choose Fitts
         </h3>
 
         <div className="relative">

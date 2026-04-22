@@ -10,8 +10,8 @@ const montserrat = Montserrat({ subsets: ["latin"] });
 const lato = Lato({ weight: "400", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Notes App",
-  description: "This is an app to take notes.",
+  title: "Fitts",
+  description: "Workout tracking across web and native apps.",
 };
 
 export default function RootLayout({

@@ -15,34 +15,34 @@ import { useUser } from "@clerk/expo";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 
-const NotesDashboardScreen = ({ navigation }) => {
+const WorkoutsDashboardScreen = ({ navigation }) => {
   const user = useUser();
   const imageUrl = user?.user?.imageUrl;
   const firstName = user?.user?.firstName;
 
-  const allNotes = useQuery(api.notes.getNotes);
+  const allWorkouts = useQuery(api.workouts.getWorkouts);
   const [search, setSearch] = useState("");
 
-  const finalNotes =
-    search && allNotes
-      ? allNotes.filter(
-          (note) =>
-            note.title.toLowerCase().includes(search.toLowerCase()) ||
-            note.content.toLowerCase().includes(search.toLowerCase()),
+  const filteredWorkouts =
+    search && allWorkouts
+      ? allWorkouts.filter(
+          (workout) =>
+            workout.title.toLowerCase().includes(search.toLowerCase()) ||
+            workout.content.toLowerCase().includes(search.toLowerCase()),
         )
-      : allNotes;
+      : allWorkouts;
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate("InsideNoteScreen", {
-          item: item,
-        })
-      }
-      activeOpacity={0.5}
-      style={styles.noteItem}
-    >
-      <Text style={styles.noteText}>{item.title}</Text>
+          navigation.navigate("WorkoutDetailsScreen", {
+            item: item,
+          })
+        }
+        activeOpacity={0.5}
+        style={styles.workoutItem}
+      >
+      <Text style={styles.workoutText}>{item.title}</Text>
     </TouchableOpacity>
   );
 
@@ -55,10 +55,10 @@ const NotesDashboardScreen = ({ navigation }) => {
         />
       </View>
 
-      <View style={styles.yourNotesContainer}>
+      <View style={styles.yourWorkoutsContainer}>
         {/* @ts-ignore, for css purposes */}
         <Image style={styles.avatarSmall} />
-        <Text style={styles.title}>Your Notes</Text>
+        <Text style={styles.title}>Your Workouts</Text>
         {imageUrl ? (
           <Image style={styles.avatarSmall} source={{ uri: imageUrl }} />
         ) : (
@@ -79,18 +79,18 @@ const NotesDashboardScreen = ({ navigation }) => {
           style={styles.searchInput}
         />
       </View>
-      {!finalNotes || finalNotes.length === 0 ? (
+      {!filteredWorkouts || filteredWorkouts.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateText}>
-            Create your first note to{"\n"}get started
+            Log your first workout to{"\n"}get started
           </Text>
         </View>
       ) : (
         <FlatList
-          data={finalNotes}
+          data={filteredWorkouts}
           renderItem={renderItem}
           keyExtractor={(item) => item._id}
-          style={styles.notesList}
+          style={styles.workoutsList}
           contentContainerStyle={{
             marginTop: 19,
             borderTopWidth: 0.5,
@@ -100,11 +100,11 @@ const NotesDashboardScreen = ({ navigation }) => {
       )}
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("CreateNoteScreen")}
-        style={styles.newNoteButton}
+        onPress={() => navigation.navigate("CreateWorkoutScreen")}
+        style={styles.newWorkoutButton}
       >
         <AntDesign name="plus-circle" size={20} color="#fff" />
-        <Text style={styles.newNoteButtonText}>Create a New Note</Text>
+        <Text style={styles.newWorkoutButtonText}>Log a Workout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     fontFamily: "MMedium",
     alignSelf: "center",
   },
-  yourNotesContainer: {
+  yourWorkoutsContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -163,23 +163,23 @@ const styles = StyleSheet.create({
     fontFamily: "MRegular",
     color: "#2D2D2D",
   },
-  notesList: {
+  workoutsList: {
     flex: 1,
   },
-  noteItem: {
+  workoutItem: {
     padding: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: "rgba(0, 0, 0, 0.59)",
 
     backgroundColor: "#F9FAFB",
   },
-  noteText: {
+  workoutText: {
     fontSize: 16,
     fontFamily: "MLight",
     color: "#2D2D2D",
   },
 
-  newNoteButton: {
+  newWorkoutButton: {
     flexDirection: "row",
     backgroundColor: "#0D87E1",
     borderRadius: 7,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
 
     elevation: 6,
   },
-  newNoteButtonText: {
+  newWorkoutButtonText: {
     color: "white",
     fontSize: RFValue(15),
     fontFamily: "MMedium",
@@ -230,4 +230,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotesDashboardScreen;
+export default WorkoutsDashboardScreen;

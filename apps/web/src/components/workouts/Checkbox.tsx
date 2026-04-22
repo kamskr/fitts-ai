@@ -25,11 +25,11 @@ const Checkbox = ({
           htmlFor="candidates"
           className=" text-black text-[17px] sm:text-2xl pb-2 not-italic font-light leading-[90.3%] tracking-[-0.6px]"
         >
-          Advanced Summarization {openaiKeySet ? "" : " (Disabled)"}
+          AI Workout Recap {openaiKeySet ? "" : " (Disabled)"}
         </label>
         {openaiKeySet ? (
           <p className=" text-black text-sm sm:text-[17px] not-italic font-extralight leading-[90.3%] tracking-[-0.425px]">
-            Check this box if you want to generate summaries using AI
+            Check this box if you want AI to summarize the session.
           </p>
         ) : (
           <p>

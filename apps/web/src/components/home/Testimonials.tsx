@@ -5,7 +5,7 @@ const TestimonialsData = [
   {
     rating: 5,
     review:
-      "Great note-taking application! The AI features make note-taking a breeze",
+      "Great training log. The AI recap is useful after longer sessions.",
     name: "Ryan Lowry",
     designation: "Engineer & Author",
     profile: "/images/profile.png",
@@ -14,7 +14,7 @@ const TestimonialsData = [
   {
     rating: 5,
     review:
-      "Really like the clean design of UseNotes. The AI-driven search is impressively accurate, adding a personal dimension to my notes. Fast and very easy to use.",
+      "Really like the clean design of Fitts. Logging workouts is fast, and reviewing old sessions helps me stay honest about progress.",
     name: "John Collins",
     designation: "Engineer & Author",
     profile: "/images/profile.png",
@@ -22,7 +22,7 @@ const TestimonialsData = [
   },
   {
     rating: 5,
-    review: "Simply brilliant! UseNotes has elevated my productivity.",
+    review: "Simply brilliant. Fitts has made my training more consistent.",
     name: "Moe Partuj",
     designation: "Student",
     profile: "/images/Moe-Partuj.jpeg",

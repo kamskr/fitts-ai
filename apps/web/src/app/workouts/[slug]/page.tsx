@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import NoteDetails from "@/components/notes/NoteDetails";
+import WorkoutDetails from "@/components/workouts/WorkoutDetails";
 import { Id } from "@packages/backend/convex/_generated/dataModel";
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
@@ -7,7 +7,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   return (
     <main className="bg-[#F5F7FE] h-screen">
       <Header />
-      <NoteDetails noteId={slug as Id<"notes">} />
+      <WorkoutDetails workoutId={slug as Id<"workouts">} />
     </main>
   );
 }

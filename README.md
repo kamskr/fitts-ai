@@ -12,12 +12,12 @@ featuring:
 - [Clerk](https://clerk.dev): User authentication
 - OpenAI: Text summarization (optional)
 
-The example app is a note taking app that can summarize notes using AI. Features
+The example app is a workout tracking app that can summarize workout logs using AI. Features
 include:
 
 - Marketing page
 - Dashboard page (web & native)
-- Note taking page (web & native)
+- Workout logging page (web & native)
 - Backend API that serves web & native with the same API
 - Relational database
 - End to end type safety (schema definition to frontend API clients)

@@ -4,7 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
-export default function DeleteNote({ deleteAction }: any) {
+export default function DeleteWorkout({ deleteAction }: any) {
   const [open, setOpen] = useState(false);
 
   const cancelButtonRef = useRef(null);
@@ -64,11 +64,11 @@ export default function DeleteNote({ deleteAction }: any) {
                           as="h3"
                           className="text-base font-semibold leading-6 text-gray-900"
                         >
-                          Delete Note
+                          Delete Workout
                         </Dialog.Title>
                         <div className="mt-2">
                           <p className="text-sm text-gray-500">
-                            Are you sure you want to delete this note? All of
+                            Are you sure you want to delete this workout? All of
                             your data will be permanently removed. This action
                             cannot be undone.
                           </p>

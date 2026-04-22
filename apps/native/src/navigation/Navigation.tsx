@@ -5,9 +5,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "@clerk/expo";
 import { useConvexAuth } from "convex/react";
 import LoginScreen from "../screens/LoginScreen";
-import NotesDashboardScreen from "../screens/NotesDashboardScreen";
-import InsideNoteScreen from "../screens/InsideNoteScreen";
-import CreateNoteScreen from "../screens/CreateNoteScreen";
+import WorkoutsDashboardScreen from "../screens/WorkoutsDashboardScreen";
+import WorkoutDetailsScreen from "../screens/WorkoutDetailsScreen";
+import CreateWorkoutScreen from "../screens/CreateWorkoutScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,16 +29,16 @@ const Navigation = () => {
         {isSignedIn ? (
           <>
             <Stack.Screen
-              name="NotesDashboardScreen"
-              component={NotesDashboardScreen}
+              name="WorkoutsDashboardScreen"
+              component={WorkoutsDashboardScreen}
             />
             <Stack.Screen
-              name="InsideNoteScreen"
-              component={InsideNoteScreen}
+              name="WorkoutDetailsScreen"
+              component={WorkoutDetailsScreen}
             />
             <Stack.Screen
-              name="CreateNoteScreen"
-              component={CreateNoteScreen}
+              name="CreateWorkoutScreen"
+              component={CreateWorkoutScreen}
             />
           </>
         ) : (

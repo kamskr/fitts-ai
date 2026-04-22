@@ -7,37 +7,34 @@ export const getUserId = async (ctx: { auth: Auth }) => {
   return (await ctx.auth.getUserIdentity())?.subject;
 };
 
-// Get all notes for a specific user
-export const getNotes = query({
+export const getWorkouts = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getUserId(ctx);
     if (!userId) return null;
 
-    const notes = await ctx.db
-      .query("notes")
+    const workouts = await ctx.db
+      .query("workouts")
       .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
 
-    return notes;
+    return workouts;
   },
 });
 
-// Get note for a specific note
-export const getNote = query({
+export const getWorkout = query({
   args: {
-    id: v.optional(v.id("notes")),
+    id: v.optional(v.id("workouts")),
   },
   handler: async (ctx, args) => {
     const { id } = args;
     if (!id) return null;
-    const note = await ctx.db.get(id);
-    return note;
+    const workout = await ctx.db.get(id);
+    return workout;
   },
 });
 
-// Create a new note for a user
-export const createNote = mutation({
+export const createWorkout = mutation({
   args: {
     title: v.string(),
     content: v.string(),
@@ -46,25 +43,25 @@ export const createNote = mutation({
   handler: async (ctx, { title, content, isSummary }) => {
     const userId = await getUserId(ctx);
     if (!userId) throw new Error("User not found");
-    const noteId = await ctx.db.insert("notes", { userId, title, content });
+    const workoutId = await ctx.db.insert("workouts", { userId, title, content });
 
     if (isSummary) {
       await ctx.scheduler.runAfter(0, internal.openai.summary, {
-        id: noteId,
+        id: workoutId,
         title,
         content,
       });
     }
 
-    return noteId;
+    return workoutId;
   },
 });
 
-export const deleteNote = mutation({
+export const deleteWorkout = mutation({
   args: {
-    noteId: v.id("notes"),
+    workoutId: v.id("workouts"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.noteId);
+    await ctx.db.delete(args.workoutId);
   },
 });
