@@ -129,7 +129,8 @@ export const importWorkoutSession = mutation({
     let currentExerciseName: string | undefined;
     let currentBlockIndex = -1;
 
-    for (const [rowIndex, row] of args.rows.entries()) {
+    for (let rowIndex = 0; rowIndex < args.rows.length; rowIndex += 1) {
+      const row = args.rows[rowIndex];
       if (row.exerciseName !== currentExerciseName) {
         currentExerciseName = row.exerciseName;
         currentBlockIndex += 1;

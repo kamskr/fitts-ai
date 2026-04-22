@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as dev from "../dev.js";
 import type * as exercises from "../exercises.js";
 import type * as importStrong from "../importStrong.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -29,6 +30,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  dev: typeof dev;
   exercises: typeof exercises;
   importStrong: typeof importStrong;
   "lib/auth": typeof lib_auth;

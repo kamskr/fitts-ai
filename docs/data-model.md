@@ -551,6 +551,36 @@ Compatibility module retained during migration:
    - original value/unit
    - raw source row metadata
 
+## Temporary test UI
+
+Current web test bench lives on `/workouts`.
+
+Purpose:
+
+- seed 3 demo exercises
+- create one demo template
+- start workout from template
+- enter actual set values
+- complete workout and verify template updates
+
+Seeded demo exercises:
+
+- Bench Press
+- Pull Up
+- Romanian Deadlift
+
+This UI is intentionally basic and temporary. It exists to validate the structured backend loop before building the real product workflows.
+
+## Development reset note
+
+During development we intentionally chose **database reset over legacy migration**.
+
+Meaning:
+
+- the schema is strict again
+- old freeform `workouts` rows are not supported anymore
+- if local/dev data drifts again, use the development reset flow instead of carrying compatibility fields in the main schema
+
 ## Index strategy
 
 Indexes are optimized for:

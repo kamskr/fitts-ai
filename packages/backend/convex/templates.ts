@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { requireCurrentUserId } from "./lib/auth";
 import { normalizeName, optionalString } from "./lib/normalize";
 import { getTemplateTree } from "./lib/readModels";
@@ -72,8 +73,9 @@ export const create = mutation({
       notes: optionalString(args.notes),
     });
 
-    for (const [exerciseIndex, exerciseInput] of args.exercises.entries()) {
-      const exercise = await ctx.db.get(exerciseInput.exerciseId);
+    for (let exerciseIndex = 0; exerciseIndex < args.exercises.length; exerciseIndex += 1) {
+      const exerciseInput = args.exercises[exerciseIndex];
+      const exercise = (await ctx.db.get(exerciseInput.exerciseId)) as Doc<"exercises"> | null;
       if (!exercise) {
         throw new Error(`Exercise ${exerciseInput.exerciseId} not found`);
       }

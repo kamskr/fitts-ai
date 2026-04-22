@@ -73,6 +73,47 @@ export const createAlias = mutation({
   },
 });
 
+export const seedDemoExercises = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireCurrentUserId(ctx);
+    const demos = [
+      { name: "Bench Press", equipment: "Barbell" },
+      { name: "Pull Up", equipment: "Bodyweight" },
+      { name: "Romanian Deadlift", equipment: "Barbell" },
+    ];
+
+    const ids = [];
+    for (const demo of demos) {
+      const normalizedName = normalizeName(demo.name);
+      const existing = await ctx.db
+        .query("exercises")
+        .withIndex("by_ownerUserId_and_normalizedName", (q) =>
+          q.eq("ownerUserId", userId).eq("normalizedName", normalizedName),
+        )
+        .unique();
+
+      if (existing) {
+        ids.push(existing._id);
+        continue;
+      }
+
+      const id = await ctx.db.insert("exercises", {
+        ownerUserId: userId,
+        name: demo.name,
+        normalizedName,
+        origin: "user",
+        visibility: "private",
+        equipment: demo.equipment,
+        notes: "Seeded demo exercise for core UI testing.",
+      });
+      ids.push(id);
+    }
+
+    return ids;
+  },
+});
+
 export const findMatch = query({
   args: {
     name: v.string(),

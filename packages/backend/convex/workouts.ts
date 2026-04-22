@@ -5,16 +5,19 @@ const toLegacyWorkout = (
   workout: {
     _id: string;
     _creationTime: number;
-    name: string;
+    name?: string;
+    title?: string;
     description?: string;
+    content?: string;
     notes?: string;
+    summary?: string;
   },
 ) => ({
   _id: workout._id,
   _creationTime: workout._creationTime,
-  title: workout.name,
-  content: workout.description ?? workout.notes ?? "",
-  summary: undefined,
+  title: workout.name ?? workout.title ?? "Untitled workout",
+  content: workout.description ?? workout.content ?? workout.notes ?? "",
+  summary: workout.summary,
 });
 
 async function getCurrentUserIdOrNull(ctx: {
