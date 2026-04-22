@@ -1,8 +1,7 @@
 {
   "expo": {
-    "newArchEnabled": true,
-    "name": "NotesContract",
-    "slug": "NotesContract",
+    "name": "Fitts",
+    "slug": "Fitts",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,11 +11,19 @@
       "resizeMode": "contain",
       "backgroundColor": "#0D87E1"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.kamskr.fitts",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "appleTeamId": "3ZFW552GXP"
     },
     "android": {
+      "package": "com.kamskr.fitts",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -25,6 +32,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font"]
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      "@clerk/expo",
+      "expo-asset",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2df8c89a-5e1c-40d3-8ced-a4ae7037bc81"
+      }
+    }
   }
 }

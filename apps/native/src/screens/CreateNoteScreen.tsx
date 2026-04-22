@@ -9,23 +9,26 @@ import {
   TextInput,
   Keyboard,
   Animated,
+  Alert,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import { AntDesign } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { api } from "@packages/backend/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 const { width } = Dimensions.get("window");
 
 export default function CreateNoteScreen({ navigation }) {
   const createNote = useMutation(api.notes.createNote);
   const openaiKeySet = useQuery(api.openai.openaiKeySet) ?? true;
+  const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
 
   const [isAdvancedSummarizationEnabled, setIsAdvancedSummarizationEnabled] =
     useState(false);
   const [noteContent, setNoteContent] = useState("");
   const [noteTitle, setNoteTitle] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const footerY = new Animated.Value(0);
   const toggleAdvancedSummarization = () => {
     setIsAdvancedSummarizationEnabled(!isAdvancedSummarizationEnabled);
@@ -69,12 +72,27 @@ export default function CreateNoteScreen({ navigation }) {
   });
 
   const createUserNote = async () => {
-    await createNote({
-      title: noteTitle,
-      content: noteContent,
-      isSummary: isAdvancedSummarizationEnabled,
-    });
-    navigation.navigate("NotesDashboardScreen");
+    if (isCreating) return;
+
+    if (isConvexAuthLoading || !isAuthenticated) {
+      Alert.alert("Auth syncing", "Try again in a moment.");
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      await createNote({
+        title: noteTitle,
+        content: noteContent,
+        isSummary: isAdvancedSummarizationEnabled,
+      });
+      navigation.navigate("NotesDashboardScreen");
+    } catch (error) {
+      console.error("Create note error", error);
+      Alert.alert("Could not create note", "Try again in a moment.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -166,7 +184,11 @@ export default function CreateNoteScreen({ navigation }) {
           { transform: [{ translateY: footerTranslateY }] },
         ]}
       >
-        <TouchableOpacity onPress={createUserNote} style={styles.newNoteButton}>
+        <TouchableOpacity
+          onPress={createUserNote}
+          style={styles.newNoteButton}
+          disabled={isCreating}
+        >
           <AntDesign name="plus-circle" size={20} color="#fff" />
           <Text style={styles.newNoteButtonText}>Create a New Note</Text>
         </TouchableOpacity>

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/expo";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 
@@ -23,13 +23,14 @@ const NotesDashboardScreen = ({ navigation }) => {
   const allNotes = useQuery(api.notes.getNotes);
   const [search, setSearch] = useState("");
 
-  const finalNotes = search
-    ? allNotes.filter(
-        (note) =>
-          note.title.toLowerCase().includes(search.toLowerCase()) ||
-          note.content.toLowerCase().includes(search.toLowerCase()),
-      )
-    : allNotes;
+  const finalNotes =
+    search && allNotes
+      ? allNotes.filter(
+          (note) =>
+            note.title.toLowerCase().includes(search.toLowerCase()) ||
+            note.content.toLowerCase().includes(search.toLowerCase()),
+        )
+      : allNotes;
 
   const renderItem = ({ item }) => (
     <TouchableOpacity

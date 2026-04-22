@@ -1,10 +1,19 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
-import { useOAuth } from "@clerk/clerk-expo";
+import { useAuth, useOAuth } from "@clerk/expo";
 import { AntDesign } from "@expo/vector-icons";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
+  const { isSignedIn, signOut } = useAuth();
+  const [isSigningIn, setIsSigningIn] = React.useState(false);
   const { startOAuthFlow: startGoogleAuthFlow } = useOAuth({
     strategy: "oauth_google",
   });
@@ -13,22 +22,34 @@ const LoginScreen = ({ navigation }) => {
   });
 
   const onPress = async (authType: string) => {
+    if (isSigningIn) return;
+
     try {
+      setIsSigningIn(true);
+      if (isSignedIn) return;
+
       if (authType === "google") {
         const { createdSessionId, setActive } = await startGoogleAuthFlow();
         if (createdSessionId) {
-          setActive({ session: createdSessionId });
-          navigation.navigate("NotesDashboardScreen");
+          await setActive?.({ session: createdSessionId });
         }
       } else if (authType === "apple") {
         const { createdSessionId, setActive } = await startAppleAuthFlow();
         if (createdSessionId) {
-          setActive({ session: createdSessionId });
-          navigation.navigate("NotesDashboardScreen");
+          await setActive?.({ session: createdSessionId });
         }
       }
     } catch (err) {
+      if (isSessionExistsError(err)) {
+        if (!isSignedIn) {
+          await signOut();
+          Alert.alert("Session reset", "Try signing in again.");
+        }
+        return;
+      }
       console.error("OAuth error", err);
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -44,6 +65,7 @@ const LoginScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.buttonGoogle}
           onPress={() => onPress("google")}
+          disabled={isSigningIn}
         >
           <Image
             style={styles.googleIcon}
@@ -57,6 +79,7 @@ const LoginScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.buttonApple}
           onPress={() => onPress("apple")}
+          disabled={isSigningIn}
         >
           <AntDesign name="apple" size={24} color="black" />
           <Text
@@ -72,6 +95,16 @@ const LoginScreen = ({ navigation }) => {
         </View>
       </View>
     </View>
+  );
+};
+
+const isSessionExistsError = (err: unknown) => {
+  const maybeClerkError = err as {
+    errors?: Array<{ code?: string }>;
+  };
+
+  return maybeClerkError.errors?.some(
+    (error) => error.code === "session_exists",
   );
 };
 

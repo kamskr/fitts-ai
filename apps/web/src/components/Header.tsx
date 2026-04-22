@@ -4,7 +4,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Logo from "./common/Logo";
 import Link from "next/link";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/nextjs";
 import { UserNav } from "./common/UserNav";
 import { usePathname } from "next/navigation";
 
