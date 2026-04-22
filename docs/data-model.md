@@ -463,6 +463,94 @@ Query shape:
 - ignore skipped sets
 - match template slot by exercise position + `setGroup + setNumber`
 
+## Convex module surface
+
+Implemented backend modules:
+
+- `programs.ts`
+  - `list`
+  - `get`
+  - `create`
+- `exercises.ts`
+  - `list`
+  - `create`
+  - `createAlias`
+  - `findMatch`
+- `templates.ts`
+  - `list`
+  - `get`
+  - `create`
+  - `startWorkout`
+- `sessions.ts`
+  - `listRecent`
+  - `get`
+  - `updateSet`
+  - `completeWorkout`
+  - `cancelWorkout`
+- `importStrong.ts`
+  - `importWorkoutSession`
+  - `importMeasurements`
+
+Compatibility module retained during migration:
+
+- `workouts.ts`
+  - thin legacy adapter over new `workouts` table for old web/native screens
+
+## API workflows
+
+### Create template
+
+1. create or select exercises
+2. call `templates.create`
+3. pass ordered exercises
+4. each exercise includes ordered prescribed sets
+
+### Start workout from template
+
+1. call `templates.startWorkout({ templateId })`
+2. backend creates:
+   - `workout`
+   - `workoutExercises`
+   - `workoutSets`
+3. all set prescriptions are copied into `targetSnapshot`
+4. workout starts in `in_progress`
+
+### Log set during workout
+
+1. call `sessions.updateSet`
+2. patch:
+   - `status`
+   - `actual`
+   - `notes`
+3. actual values remain separate from target snapshot
+
+### Complete workout
+
+1. call `sessions.completeWorkout`
+2. workout becomes `completed`
+3. if based on template:
+   - completed, non-skipped set values update the matching template set prescription
+
+### Strong workout import
+
+1. parse CSV outside Convex
+2. group rows into one workout session
+3. call `importStrong.importWorkoutSession`
+4. backend:
+   - creates standalone completed workout
+   - creates contiguous exercise blocks
+   - maps exercises by normalized name / alias when safe
+   - stores raw import metadata on workout/set rows
+
+### Strong measurement import
+
+1. parse CSV outside Convex
+2. call `importStrong.importMeasurements`
+3. backend stores:
+   - canonical value/unit
+   - original value/unit
+   - raw source row metadata
+
 ## Index strategy
 
 Indexes are optimized for:
