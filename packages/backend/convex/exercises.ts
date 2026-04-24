@@ -1,5 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import {
+  exerciseCategoryValidator,
+  exerciseDifficultyValidator,
+  exerciseForceValidator,
+  exerciseMechanicValidator,
+} from "./model";
 import { requireCurrentUserId } from "./lib/auth";
 import { normalizeName, optionalString } from "./lib/normalize";
 
@@ -24,6 +30,52 @@ export const list = query({
   },
 });
 
+export const get = query({
+  args: {
+    exerciseId: v.id("exercises"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireCurrentUserId(ctx);
+    const exercise = await ctx.db.get(args.exerciseId);
+    if (!exercise) {
+      return null;
+    }
+    if (exercise.ownerUserId && exercise.ownerUserId !== userId) {
+      return null;
+    }
+
+    const [aliases, muscles, instructions, media] = await Promise.all([
+      ctx.db
+        .query("exerciseAliases")
+        .withIndex("by_exerciseId_and_normalizedAlias", (q) => q.eq("exerciseId", args.exerciseId))
+        .take(64),
+      ctx.db
+        .query("exerciseMuscles")
+        .withIndex("by_exerciseId_and_order", (q) => q.eq("exerciseId", args.exerciseId))
+        .order("asc")
+        .take(32),
+      ctx.db
+        .query("exerciseInstructions")
+        .withIndex("by_exerciseId_and_stepNumber", (q) => q.eq("exerciseId", args.exerciseId))
+        .order("asc")
+        .take(32),
+      ctx.db
+        .query("exerciseMedia")
+        .withIndex("by_exerciseId_and_order", (q) => q.eq("exerciseId", args.exerciseId))
+        .order("asc")
+        .take(32),
+    ]);
+
+    return {
+      ...exercise,
+      aliases,
+      muscles,
+      instructions,
+      media,
+    };
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),
@@ -32,6 +84,10 @@ export const create = mutation({
     defaultWeightUnit: v.optional(v.union(v.literal("g"), v.literal("kg"), v.literal("lb"))),
     defaultDistanceUnit: v.optional(v.union(v.literal("m"), v.literal("km"), v.literal("ft"), v.literal("mi"))),
     equipment: v.optional(v.string()),
+    category: v.optional(exerciseCategoryValidator),
+    force: v.optional(exerciseForceValidator),
+    mechanic: v.optional(exerciseMechanicValidator),
+    difficultyLevel: v.optional(exerciseDifficultyValidator),
   },
   handler: async (ctx, args) => {
     const userId = await requireCurrentUserId(ctx);
@@ -46,6 +102,10 @@ export const create = mutation({
       defaultWeightUnit: args.defaultWeightUnit,
       defaultDistanceUnit: args.defaultDistanceUnit,
       equipment: optionalString(args.equipment),
+      category: args.category,
+      force: args.force,
+      mechanic: args.mechanic,
+      difficultyLevel: args.difficultyLevel,
     });
   },
 });

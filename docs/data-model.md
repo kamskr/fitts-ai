@@ -318,6 +318,12 @@ Fields:
 - `defaultWeightUnit?`
 - `defaultDistanceUnit?`
 - `equipment?`
+- `category?`
+- `force?`
+- `mechanic?`
+- `difficultyLevel?`
+- `sourceDataset?`
+- `sourceExerciseKey?`
 
 Rules:
 
@@ -325,6 +331,7 @@ Rules:
 - user custom exercises have `ownerUserId`
 - shared template/program copies also copy required custom exercises into the recipient account
 - copied custom exercises keep provenance through `copiedFromExerciseId`
+- `exercises` stores canonical identity + top-level filter fields, not every ordered child detail inline
 
 ### `exerciseAliases`
 
@@ -343,6 +350,54 @@ Matching strategy:
 3. fallback to creating a new exercise only when there is no safe mapping
 
 No fuzzy auto-match in v1.
+
+### `exerciseMuscles`
+
+Ordered muscle rows attached to an exercise.
+
+Fields:
+
+- `exerciseId`
+- `muscle`
+- `role` = `primary | secondary`
+- `order`
+
+Notes:
+
+- imported seed data from `free-exercise-db` maps `primaryMuscles` and `secondaryMuscles` into these rows
+- child rows keep filtering/extensibility simple without bloating the canonical exercise document
+
+### `exerciseInstructions`
+
+Ordered instruction steps attached to an exercise.
+
+Fields:
+
+- `exerciseId`
+- `stepNumber`
+- `text`
+
+Notes:
+
+- seed data preserves upstream step ordering
+- future localization can extend this table without reshaping `exercises`
+
+### `exerciseMedia`
+
+Ordered media rows attached to an exercise.
+
+Fields:
+
+- `exerciseId`
+- `kind` = `image | gif | video`
+- `url`
+- `order`
+- `source?`
+
+Notes:
+
+- for the forked `free-exercise-db`, initial rows are expected to be `image` entries pointing at repo-relative media paths
+- this keeps the schema generic enough for future GIF/video sources without another migration
 
 ### `measurements`
 
@@ -431,6 +486,16 @@ flowchart TD
 - Strong names should map to canonical exercises when safe
 - e.g. `Bench Press (Barbell)` should reuse the existing bench-press exercise if already mapped through exact name or alias
 - do not rely on fuzzy heuristics for automatic mapping in v1
+- real Strong examples seen in `../strong_data/strong_workouts.csv` include naming variants like:
+  - `Bench Press (Barbell)`
+  - `Strict Military Press (Barbell)`
+  - `Lateral Raise (Dumbbell)`
+  - `Chest Dip`
+- this makes seeded aliases a first-class requirement, not an optional enhancement
+- current comparison snapshot against the forked `free-exercise-db`:
+  - `107` unique Strong exercise names in sample export
+  - `11` direct normalized-name matches
+  - `96` require alias seeding or curated canonical mapping
 
 ### Measurement imports
 
@@ -605,6 +670,11 @@ Important indexes:
 - `exercises.by_normalizedName`
 - `exercises.by_ownerUserId_and_normalizedName`
 - `exerciseAliases.by_normalizedAlias`
+- `exerciseMuscles.by_exerciseId_and_order`
+- `exerciseMuscles.by_muscle_and_role`
+- `exerciseInstructions.by_exerciseId_and_stepNumber`
+- `exerciseMedia.by_exerciseId_and_order`
+- `exerciseMedia.by_exerciseId_and_kind_and_order`
 - `measurements.by_userId_and_type_and_occurredAt`
 
 ## Future additions intentionally left out

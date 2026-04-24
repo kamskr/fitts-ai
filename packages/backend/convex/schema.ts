@@ -3,6 +3,12 @@ import { v } from "convex/values";
 import {
   bodyMeasurementUnitValidator,
   distanceUnitValidator,
+  exerciseCategoryValidator,
+  exerciseDifficultyValidator,
+  exerciseForceValidator,
+  exerciseMediaKindValidator,
+  exerciseMechanicValidator,
+  exerciseMuscleRoleValidator,
   exerciseOriginValidator,
   exerciseVisibilityValidator,
   measurementImportMetadataValidator,
@@ -47,6 +53,12 @@ export default defineSchema({
     defaultWeightUnit: v.optional(weightUnitValidator),
     defaultDistanceUnit: v.optional(distanceUnitValidator),
     equipment: v.optional(v.string()),
+    category: v.optional(exerciseCategoryValidator),
+    force: v.optional(exerciseForceValidator),
+    mechanic: v.optional(exerciseMechanicValidator),
+    difficultyLevel: v.optional(exerciseDifficultyValidator),
+    sourceDataset: v.optional(v.string()),
+    sourceExerciseKey: v.optional(v.string()),
   })
     .index("by_normalizedName", ["normalizedName"])
     .index("by_ownerUserId_and_normalizedName", ["ownerUserId", "normalizedName"])
@@ -59,6 +71,31 @@ export default defineSchema({
   })
     .index("by_normalizedAlias", ["normalizedAlias"])
     .index("by_exerciseId_and_normalizedAlias", ["exerciseId", "normalizedAlias"]),
+
+  exerciseMuscles: defineTable({
+    exerciseId: v.id("exercises"),
+    muscle: v.string(),
+    role: exerciseMuscleRoleValidator,
+    order: v.number(),
+  })
+    .index("by_exerciseId_and_order", ["exerciseId", "order"])
+    .index("by_muscle_and_role", ["muscle", "role"]),
+
+  exerciseInstructions: defineTable({
+    exerciseId: v.id("exercises"),
+    stepNumber: v.number(),
+    text: v.string(),
+  }).index("by_exerciseId_and_stepNumber", ["exerciseId", "stepNumber"]),
+
+  exerciseMedia: defineTable({
+    exerciseId: v.id("exercises"),
+    kind: exerciseMediaKindValidator,
+    url: v.string(),
+    order: v.number(),
+    source: v.optional(v.string()),
+  })
+    .index("by_exerciseId_and_order", ["exerciseId", "order"])
+    .index("by_exerciseId_and_kind_and_order", ["exerciseId", "kind", "order"]),
 
   workoutTemplates: defineTable({
     userId: v.string(),

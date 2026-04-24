@@ -81,6 +81,44 @@ export const exerciseOriginValidator = v.union(
   v.literal("imported"),
 );
 
+export const exerciseForceValidator = v.union(
+  v.literal("static"),
+  v.literal("pull"),
+  v.literal("push"),
+);
+
+export const exerciseDifficultyValidator = v.union(
+  v.literal("beginner"),
+  v.literal("intermediate"),
+  v.literal("expert"),
+);
+
+export const exerciseMechanicValidator = v.union(
+  v.literal("isolation"),
+  v.literal("compound"),
+);
+
+export const exerciseCategoryValidator = v.union(
+  v.literal("powerlifting"),
+  v.literal("strength"),
+  v.literal("stretching"),
+  v.literal("cardio"),
+  v.literal("olympic weightlifting"),
+  v.literal("strongman"),
+  v.literal("plyometrics"),
+);
+
+export const exerciseMuscleRoleValidator = v.union(
+  v.literal("primary"),
+  v.literal("secondary"),
+);
+
+export const exerciseMediaKindValidator = v.union(
+  v.literal("image"),
+  v.literal("gif"),
+  v.literal("video"),
+);
+
 export const workoutOriginValidator = v.union(
   v.literal("manual"),
   v.literal("template"),
