@@ -335,7 +335,7 @@ Rules:
 
 ### `exerciseAliases`
 
-Alternative names used for import and matching.
+Alternative names used for generic matching.
 
 Fields:
 
@@ -350,6 +350,24 @@ Matching strategy:
 3. fallback to creating a new exercise only when there is no safe mapping
 
 No fuzzy auto-match in v1.
+
+### `exerciseImportMappings`
+
+Source-aware exercise name mappings for imports.
+
+Fields:
+
+- `exerciseId`
+- `sourceSystem`
+- `sourceName`
+- `normalizedSourceName`
+
+Notes:
+
+- this table is intentionally import-source agnostic
+- Strong is just one `sourceSystem`, not a special-case schema concept
+- future importers can reuse the same mapping mechanism for Hevy, Fitbod, CSV uploads, or other sources
+- source-aware mappings should be checked before generic aliases when an importer knows its source system
 
 ### `exerciseMuscles`
 
@@ -483,19 +501,19 @@ flowchart TD
 
 ### Exercise mapping
 
-- Strong names should map to canonical exercises when safe
-- e.g. `Bench Press (Barbell)` should reuse the existing bench-press exercise if already mapped through exact name or alias
+- importer names should map to canonical exercises when safe
+- e.g. `Bench Press (Barbell)` from Strong should reuse the chosen bench-press canonical exercise if already mapped through a source-aware mapping, exact name, or alias
 - do not rely on fuzzy heuristics for automatic mapping in v1
 - real Strong examples seen in `../strong_data/strong_workouts.csv` include naming variants like:
   - `Bench Press (Barbell)`
   - `Strict Military Press (Barbell)`
   - `Lateral Raise (Dumbbell)`
   - `Chest Dip`
-- this makes seeded aliases a first-class requirement, not an optional enhancement
+- this makes seeded import mappings and/or aliases a first-class requirement, not an optional enhancement
 - current comparison snapshot against the forked `free-exercise-db`:
   - `107` unique Strong exercise names in sample export
   - `11` direct normalized-name matches
-  - `96` require alias seeding or curated canonical mapping
+  - `96` require source-aware mapping, alias seeding, or curated canonical mapping
 
 ### Measurement imports
 
@@ -607,6 +625,34 @@ Compatibility module retained during migration:
    - maps exercises by normalized name / alias when safe
    - stores raw import metadata on workout/set rows
 
+### Seeded exercise catalog import
+
+Current local helper commands:
+
+- generate a reviewable Strong-to-seeded-catalog mapping draft:
+  - `pnpm --filter @packages/backend draft:strong-mappings`
+- compare Strong export names against the forked dataset:
+  - `pnpm --filter @packages/backend compare:strong-names`
+- import the forked dataset into Convex shared exercise rows:
+  - `CONVEX_URL=... pnpm --filter @packages/backend seed:exercises`
+- import reviewed source-aware exercise mappings into Convex:
+  - `CONVEX_URL=... pnpm --filter @packages/backend seed:exercise-mappings`
+
+Mapping draft review flow:
+
+1. Generate draft JSON in `packages/backend/data/generated/`.
+2. For every `needs_review` mapping, choose a `targetSourceExerciseKey` from `candidates` or leave it `null` to skip.
+3. Change approved entries to `status: "reviewed"`.
+4. Seed exercises first, then seed exercise mappings.
+
+Current seed source:
+
+- `./free-exercise-db/dist/exercises.json`
+
+Current comparison source:
+
+- `../strong_data/strong_workouts.csv`
+
 ### Strong measurement import
 
 1. parse CSV outside Convex
@@ -670,6 +716,8 @@ Important indexes:
 - `exercises.by_normalizedName`
 - `exercises.by_ownerUserId_and_normalizedName`
 - `exerciseAliases.by_normalizedAlias`
+- `exerciseImportMappings.by_sourceSystem_and_normalizedSourceName`
+- `exerciseImportMappings.by_exerciseId_and_sourceSystem`
 - `exerciseMuscles.by_exerciseId_and_order`
 - `exerciseMuscles.by_muscle_and_role`
 - `exerciseInstructions.by_exerciseId_and_stepNumber`

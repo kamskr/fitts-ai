@@ -62,7 +62,8 @@ export default defineSchema({
   })
     .index("by_normalizedName", ["normalizedName"])
     .index("by_ownerUserId_and_normalizedName", ["ownerUserId", "normalizedName"])
-    .index("by_ownerUserId_and_archivedAt", ["ownerUserId", "archivedAt"]),
+    .index("by_ownerUserId_and_archivedAt", ["ownerUserId", "archivedAt"])
+    .index("by_sourceDataset_and_sourceExerciseKey", ["sourceDataset", "sourceExerciseKey"]),
 
   exerciseAliases: defineTable({
     exerciseId: v.id("exercises"),
@@ -71,6 +72,15 @@ export default defineSchema({
   })
     .index("by_normalizedAlias", ["normalizedAlias"])
     .index("by_exerciseId_and_normalizedAlias", ["exerciseId", "normalizedAlias"]),
+
+  exerciseImportMappings: defineTable({
+    exerciseId: v.id("exercises"),
+    sourceSystem: v.string(),
+    sourceName: v.string(),
+    normalizedSourceName: v.string(),
+  })
+    .index("by_sourceSystem_and_normalizedSourceName", ["sourceSystem", "normalizedSourceName"])
+    .index("by_exerciseId_and_sourceSystem", ["exerciseId", "sourceSystem"]),
 
   exerciseMuscles: defineTable({
     exerciseId: v.id("exercises"),

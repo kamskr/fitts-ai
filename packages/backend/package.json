@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "convex dev",
     "setup": "convex dev --until-success",
-    "typecheck": "tsc --noEmit -p convex"
+    "typecheck": "tsc --noEmit -p convex",
+    "seed:exercises": "node ./scripts/importFreeExerciseDb.mjs",
+    "compare:strong-names": "node ./scripts/compareStrongNamesToFreeExerciseDb.mjs",
+    "draft:strong-mappings": "node ./scripts/draftStrongExerciseMappings.mjs",
+    "seed:exercise-mappings": "node ./scripts/importExerciseMappings.mjs"
   },
   "author": "",
   "license": "ISC",

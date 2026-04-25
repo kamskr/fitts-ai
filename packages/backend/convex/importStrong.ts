@@ -62,6 +62,21 @@ function inferSetType(row: { distance?: number; seconds?: number }) {
 
 async function matchExerciseId(ctx: Parameters<typeof mutation>[0] extends never ? never : any, userId: string, exerciseName: string): Promise<Id<"exercises"> | undefined> {
   const normalizedName = normalizeName(exerciseName);
+  const importMappings = await ctx.db
+    .query("exerciseImportMappings")
+    .withIndex("by_sourceSystem_and_normalizedSourceName", (q: any) =>
+      q.eq("sourceSystem", "strong").eq("normalizedSourceName", normalizedName),
+    )
+    .take(20);
+
+  for (const mapping of importMappings) {
+    const exercise = await ctx.db.get(mapping.exerciseId);
+    if (!exercise) continue;
+    if (exercise.ownerUserId === undefined || exercise.ownerUserId === userId) {
+      return exercise._id;
+    }
+  }
+
   const mine = await ctx.db
     .query("exercises")
     .withIndex("by_ownerUserId_and_normalizedName", (q: any) =>
