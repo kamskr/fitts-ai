@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./_generated/server";
 import { requireCurrentUserId } from "./lib/auth";
 import { normalizeName, optionalString, optionalNumber } from "./lib/normalize";
 import { toCanonicalMeasurement, toCanonicalWeight } from "./lib/units";
@@ -60,11 +61,15 @@ function inferSetType(row: { distance?: number; seconds?: number }) {
   return "normal" as const;
 }
 
-async function matchExerciseId(ctx: Parameters<typeof mutation>[0] extends never ? never : any, userId: string, exerciseName: string): Promise<Id<"exercises"> | undefined> {
+async function matchExerciseId(
+  ctx: Pick<MutationCtx, "db">,
+  userId: string,
+  exerciseName: string,
+): Promise<Id<"exercises"> | undefined> {
   const normalizedName = normalizeName(exerciseName);
   const importMappings = await ctx.db
     .query("exerciseImportMappings")
-    .withIndex("by_sourceSystem_and_normalizedSourceName", (q: any) =>
+    .withIndex("by_sourceSystem_and_normalizedSourceName", (q) =>
       q.eq("sourceSystem", "strong").eq("normalizedSourceName", normalizedName),
     )
     .take(20);
@@ -79,7 +84,7 @@ async function matchExerciseId(ctx: Parameters<typeof mutation>[0] extends never
 
   const mine = await ctx.db
     .query("exercises")
-    .withIndex("by_ownerUserId_and_normalizedName", (q: any) =>
+    .withIndex("by_ownerUserId_and_normalizedName", (q) =>
       q.eq("ownerUserId", userId).eq("normalizedName", normalizedName),
     )
     .unique();
@@ -87,14 +92,20 @@ async function matchExerciseId(ctx: Parameters<typeof mutation>[0] extends never
 
   const shared = await ctx.db
     .query("exercises")
-    .withIndex("by_normalizedName", (q: any) => q.eq("normalizedName", normalizedName))
+    .withIndex("by_normalizedName", (q) =>
+      q.eq("normalizedName", normalizedName),
+    )
     .take(10);
-  const directShared = shared.find((exercise: any) => exercise.ownerUserId === undefined);
+  const directShared = shared.find(
+    (exercise) => exercise.ownerUserId === undefined,
+  );
   if (directShared) return directShared._id;
 
   const aliases = await ctx.db
     .query("exerciseAliases")
-    .withIndex("by_normalizedAlias", (q: any) => q.eq("normalizedAlias", normalizedName))
+    .withIndex("by_normalizedAlias", (q) =>
+      q.eq("normalizedAlias", normalizedName),
+    )
     .take(20);
   for (const alias of aliases) {
     const exercise = await ctx.db.get(alias.exerciseId);
@@ -105,6 +116,36 @@ async function matchExerciseId(ctx: Parameters<typeof mutation>[0] extends never
   }
 
   return undefined;
+}
+
+async function getOrCreateImportedExerciseId(
+  ctx: Pick<MutationCtx, "db">,
+  userId: string,
+  exerciseName: string,
+): Promise<Id<"exercises">> {
+  const matchedExerciseId = await matchExerciseId(ctx, userId, exerciseName);
+  if (matchedExerciseId) return matchedExerciseId;
+
+  const name = exerciseName.trim();
+  const normalizedName = normalizeName(name);
+  const exerciseId = await ctx.db.insert("exercises", {
+    ownerUserId: userId,
+    name,
+    normalizedName,
+    origin: "imported",
+    visibility: "private",
+    sourceDataset: "strong",
+    sourceExerciseKey: normalizedName,
+  });
+
+  await ctx.db.insert("exerciseImportMappings", {
+    exerciseId,
+    sourceSystem: "strong",
+    sourceName: name,
+    normalizedSourceName: normalizedName,
+  });
+
+  return exerciseId;
 }
 
 export const importWorkoutSession = mutation({
@@ -152,7 +193,11 @@ export const importWorkoutSession = mutation({
         currentWorkoutExerciseId = await ctx.db.insert("workoutExercises", {
           workoutId,
           order: currentBlockIndex,
-          exerciseId: await matchExerciseId(ctx, userId, row.exerciseName),
+          exerciseId: await getOrCreateImportedExerciseId(
+            ctx,
+            userId,
+            row.exerciseName,
+          ),
           exerciseNameSnapshot: row.exerciseName,
           notes: optionalString(row.notes),
           importMetadata: {
@@ -175,7 +220,10 @@ export const importWorkoutSession = mutation({
         status: "completed",
         targetSnapshot: {},
         actual: {
-          weightGrams: weightValue !== undefined ? toCanonicalWeight(weightValue, "kg") : undefined,
+          weightGrams:
+            weightValue !== undefined
+              ? toCanonicalWeight(weightValue, "kg")
+              : undefined,
           weightValue,
           weightUnit: weightValue !== undefined ? "kg" : undefined,
           reps: optionalNumber(row.reps),

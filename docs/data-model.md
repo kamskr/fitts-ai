@@ -50,6 +50,7 @@ Out of scope for v1:
 5. **Import fidelity matters**
    - Strong imports keep raw/import metadata
    - imported workouts do not require template linkage
+   - Strong exercises without a catalog mapping become private imported exercises for the importing user
 
 6. **Units are presentation-level**
    - values are stored in canonical units plus original entered/imported units
