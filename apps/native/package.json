@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.tsx",
   "scripts": {
-    "dev": "expo start --dev-client",
-    "start": "expo start --dev-client",
+    "dev": "expo start --dev-client --port 8083",
+    "start": "expo start --dev-client --port 8083",
     "android": "expo start --dev-client --android",
     "ios": "expo start --dev-client --ios",
     "build:ios": "expo run:ios",

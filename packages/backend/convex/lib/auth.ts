@@ -10,7 +10,7 @@ export async function getCurrentUserId(ctx: AuthCtx) {
 export async function requireCurrentUserId(ctx: AuthCtx) {
   const userId = await getCurrentUserId(ctx);
   if (!userId) {
-    throw new Error("User not found");
+    throw new Error("Not authenticated");
   }
   return userId;
 }
